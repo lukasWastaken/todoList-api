@@ -40,15 +40,26 @@ app.post('/add/:TodoName', async (req, res) => {
 });
 
 app.post('/complete/:TodoName', async (req, res) => {
-  const todo = req.params.TodoName;
+  const todoName = req.params.TodoName;
   try {
-    Todo.findOneAndUpdate({title: todo}, {completed: true})
-    Todo.
-    res.send("Completed todo: " + todo)
-  }catch (error){
-    res.send("Error: " + error)
+    // Update the todo to set completed to true
+    const updatedTodo = await Todo.findOneAndUpdate(
+      { title: todoName },    // Filter by title
+      { $set: { completed: true } },  // Update to set completed to true
+      { new: true }           // Return the updated document
+    );
+
+    if (updatedTodo) {
+      res.send("Completed todo: " + updatedTodo.title);
+    } else {
+      res.status(404).send("Todo not found: " + todoName);
+    }
+  } catch (error) {
+    console.error("Error completing todo:", error);
+    res.status(500).send("Error completing todo");
   }
-})
+});
+
 // Remove a todo by name
 app.post('/remove/:TodoName', async (req, res) => {
   const todoName = req.params.TodoName;
